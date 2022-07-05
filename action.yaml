@@ -1,0 +1,35 @@
+name: 'test-golang'
+description: ''
+inputs:
+  go_version:
+    description: ''
+    required: false
+    default: '^1.18'
+  results_folder:
+    description: ''
+    required: false
+    default: 'results_folder'
+  coverage_profile:
+    description: ''
+    required: false
+    default: '.coverage'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-go@v3
+      with:
+        go-version: ${{ inputs.go_version }}
+    - name: Initialize go module
+      run: go mod tidy
+      shell: bash
+    - name: Run tests and generate coverage profile
+      run: go test -covermode atomic -coverprofile ${{ inputs.results_folder }}/${{ inputs.coverage_profile }}
+      shell: bash
+    - name: Print coverage report
+      run: go tool cover -func ${{ inputs.coverage_profile }}
+      shell: bash
+    - name: Save test
+      uses: actions/upload-artifact@v2
+      with:
+        name: test_results
+        path: results_folder
